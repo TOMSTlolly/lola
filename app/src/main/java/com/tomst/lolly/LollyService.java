@@ -28,11 +28,17 @@ public class LollyService extends Service {
 
     private Context mContext;
 
-    public void SetServiceState(TDevState devState){
-        ftTMS.SetDevState(devState);
+    public void EnableDownload(boolean val){
+        ftTMS.EnableDownload(val);
     }
 
-    TDevState GetDevState(){
+    public void SetServiceState(TDevState devState)
+    {
+         ftTMS.SetDevState(devState);
+    }
+
+    TDevState GetDevState()
+    {
         return ftTMS.GetDevState();
     }
 

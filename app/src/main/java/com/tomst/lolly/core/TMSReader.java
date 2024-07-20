@@ -21,10 +21,8 @@ import androidx.annotation.RequiresApi;
 import com.ftdi.j2xx.D2xxManager;
 import com.ftdi.j2xx.FT_Device;
 
-import java.io.File;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -71,6 +69,11 @@ public class TMSReader extends Thread
     private static volatile TDevState devState;
     public void SetDevState(TDevState devState){
         this.devState = devState;
+    }
+
+    // to postpone the reading of the data when rotating the device
+    public void EnableDownload(boolean val){
+        mRunning = val;
     }
 
     public TDevState GetDevState(){
@@ -1020,7 +1023,7 @@ public class TMSReader extends Thread
                 int daysBetween = 0;
                 if (!readFromDate.isEmpty()) {
                     // find how many days from now to the read from date is
-                    LocalDate fromDate = LocalDate.parse(readFromDate);
+                    LocalDate fromDate   = LocalDate.parse(readFromDate);
                     LocalDate todaysDate = LocalDate.now();
 
                     daysBetween = (int) Math.abs(ChronoUnit.DAYS.between(fromDate, todaysDate));

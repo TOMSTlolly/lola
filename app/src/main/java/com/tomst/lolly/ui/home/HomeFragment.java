@@ -89,6 +89,7 @@ public class HomeFragment extends Fragment {
 
     private Handler progressBarHandler = new Handler(Looper.getMainLooper());
 
+    // here comes the data handler, which is called in LollyService
     protected Handler datahandler = new Handler(Looper.getMainLooper()) {
         @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
@@ -178,6 +179,32 @@ public class HomeFragment extends Fragment {
 
         Log.i("| DEBUG |", getExampleStringJNI());
 
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save UI state to the outState Bundle
+        outState.putString("tvStatusText", binding.tvStatus.getText().toString());
+        outState.putInt("proBarProgress", binding.proBar.getProgress());
+
+        // Save more UI elements here
+        odometer.EnableDownload(true);
+    }
+
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (savedInstanceState != null) {
+            String tvStatusText = savedInstanceState.getString("tvStatusText");
+            int proBarProgress = savedInstanceState.getInt("proBarProgress");
+            binding.tvStatus.setText(tvStatusText);
+            binding.proBar.setProgress(proBarProgress);
+            // Restore more UI elements here
+        }
     }
 
     private ServiceConnection connection = new ServiceConnection() {
@@ -351,7 +378,6 @@ public class HomeFragment extends Fragment {
                     binding.devser.setText(info.msg);  // cislo lizatka
                     String AFileName  = CompileFileName(info.msg);  // cislo lizatka
                     AFileName = FullName(AFileName);
-
                     //String AFileName = FullName("test.csv");
                     csv = new CSVReader(getContext());
                     csv.SetTxf(true);
