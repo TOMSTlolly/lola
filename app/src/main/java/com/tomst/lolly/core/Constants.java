@@ -3,6 +3,8 @@ package com.tomst.lolly.core;
 import android.annotation.SuppressLint;
 
 public class Constants {
+    public static final boolean SERVICE_FOREGROUND = true;  // podle typu sluzby prepinam
+
     public static boolean showMicro = true;
     static public int fMicroInter = 1279;
     static public double fMicroSlope = (8890.0 / (34000.0 - 1279.0));

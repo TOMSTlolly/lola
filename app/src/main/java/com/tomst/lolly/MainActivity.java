@@ -1,18 +1,14 @@
 package com.tomst.lolly;
 
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-
-import static java.sql.DriverManager.println;
-
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 import android.Manifest;
-import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -22,21 +18,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.mikephil.charting.data.Entry;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.NonNull;
@@ -45,35 +32,21 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.Firebase;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.database.FirebaseDatabase;
 import com.tomst.lolly.core.Constants;
 import com.tomst.lolly.core.FileOpener;
-import com.tomst.lolly.core.PermissionManager;
 import com.tomst.lolly.databinding.ActivityMainBinding;
 import com.tomst.lolly.core.DmdViewModel;
-import com.tomst.lolly.ui.options.OptionsFragment;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -84,13 +57,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private View view;
     private ActivityMainBinding binding;
 
-  //  private final String TAG = "TOMST";
-
+    //  private final String TAG = "TOMST";
     private final FileOpener fopen;
 
     private DmdViewModel dmdViewModel;
 
-    private LollyService lolly;
+    //
+    // private LollyBackService lollyBack;
+    private LollyForeService lollyFore;
 
 
     public MainActivity(){
@@ -98,14 +72,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    /*
     private ServiceConnection connection = new ServiceConnection() {
         private boolean bound;
-
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder binder) {
-            LollyService.LollyBinder lollyBinder =
-                    (LollyService.LollyBinder) binder;
-            lolly = lollyBinder.getOdometer();
+            LollyBackService.LollyBinder lollyBinder =
+                    (LollyBackService.LollyBinder) binder;
+            lollyBack = lollyBinder.getOdometer();
             bound = true;
         }
         @Override
@@ -113,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             bound = false;
         }
     };
+     */
 
 
     public boolean checkPermission(){
@@ -291,12 +266,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     FirebaseAuth auth;
     FirebaseUser user;
 
+    // uz mi bezi foregroundService ?
+    public boolean foregroundServiceRunning(){
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for(ActivityManager.RunningServiceInfo service: activityManager.getRunningServices(Integer.MAX_VALUE)) {
+            if(LollyForeService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        if (Constants.SERVICE_FOREGROUND) {
+            if (!foregroundServiceRunning()) {
+                Intent serviceIntent = new Intent(this, LollyForeService.class);
+                serviceIntent.putExtra("inputExtra", "Foreground priklad Android");
+                //startForegroundService(serviceIntent);
+                ContextCompat.startForegroundService(this,serviceIntent);
+            }
+        }
 
         view = binding.getRoot();
 

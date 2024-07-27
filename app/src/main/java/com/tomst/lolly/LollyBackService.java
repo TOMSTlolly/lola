@@ -20,7 +20,7 @@ import com.tomst.lolly.core.TDevState;
 import com.tomst.lolly.core.TInfo;
 import com.tomst.lolly.core.TMSReader;
 
-public class LollyService extends Service {
+public class LollyBackService extends Service {
 
     public void SetRunning(boolean val){
         ftTMS.SetRunning(val);
@@ -97,7 +97,7 @@ public class LollyService extends Service {
 
 
 
-    public LollyService() {
+    public LollyBackService() {
         mContext = null;
     }
 
@@ -108,8 +108,8 @@ public class LollyService extends Service {
     private LocationManager locManager;
 
     public class LollyBinder extends Binder {
-        public LollyService getOdometer() {
-            return LollyService.this;  // vraci odkaz na instanci tridy
+        public LollyBackService getOdometer() {
+            return LollyBackService.this;  // vraci odkaz na instanci tridy
         }
 
         public void setListener(BoundServiceListener listener){

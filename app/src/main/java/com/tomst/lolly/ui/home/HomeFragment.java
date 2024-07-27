@@ -4,10 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.hardware.usb.UsbManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,40 +17,30 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.os.Handler;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.ftdi.j2xx.D2xxManager;
-import com.ftdi.j2xx.FT_Device;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.tomst.lolly.LollyService;
+//import com.tomst.lolly.LollyBackService;
 import com.tomst.lolly.R;
-import com.tomst.lolly.core.BoundServiceListener;
 import com.tomst.lolly.core.CSVReader;
 import com.tomst.lolly.core.Constants;
 import com.tomst.lolly.core.DmdViewModel;
 import com.tomst.lolly.core.FileOperation;
-import com.tomst.lolly.core.OnProListener;
 import com.tomst.lolly.core.TDevState;
 import com.tomst.lolly.core.TInfo;
-import com.tomst.lolly.core.TMSReader;
 import com.tomst.lolly.core.TMereni;
 import com.tomst.lolly.core.TMeteo;
-import com.tomst.lolly.core.shared;
 import com.tomst.lolly.databinding.FragmentHomeBinding;
-import com.tomst.lolly.core.uHer;
 import com.tomst.lolly.core.PermissionManager;
 
 import java.io.File;
@@ -111,7 +98,7 @@ public class HomeFragment extends Fragment {
     private PermissionManager permissionManager;
 
     private boolean bound = false;
-    private LollyService odometer;
+//    private LollyBackService odometer;
 
     private FirebaseFirestore db;
     private TextView dataTextView;
@@ -190,7 +177,7 @@ public class HomeFragment extends Fragment {
         outState.putInt("proBarProgress", binding.proBar.getProgress());
 
         // Save more UI elements here
-        odometer.EnableDownload(true);
+       // odometer.EnableDownload(false); // stop the download
     }
 
 
@@ -204,18 +191,21 @@ public class HomeFragment extends Fragment {
             binding.tvStatus.setText(tvStatusText);
             binding.proBar.setProgress(proBarProgress);
             // Restore more UI elements here
+
+          //  odometer.EnableDownload(true); // resume the download
         }
     }
 
+    /*
     private ServiceConnection connection = new ServiceConnection() {
        @Override
        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-           LollyService.LollyBinder odometerBinder =
-                   (LollyService.LollyBinder) iBinder;
+           LollyBackService.LollyBinder odometerBinder =
+                   (LollyBackService.LollyBinder) iBinder;
            odometer = odometerBinder.getOdometer();
            odometer.SetHandler(handler);
            odometer.SetDataHandler(datahandler);   // do tohoto handleru posilam naparsovane data
-           odometer.SetContext(getContext());  // az tady muze startovat hardware
+           odometer.SetContext(getContext());      // az tady muze startovat hardware
            odometer.startBindService();
            bound = true;
        }
@@ -226,14 +216,17 @@ public class HomeFragment extends Fragment {
            bound = false;
        }
     };
+     */
 
      @Override
      public void onResume() {
         super.onResume();
 
+        /*
         if (odometer != null)
             odometer.SetServiceState(TDevState.tStart);
-        //ConnectDevice();
+         */
+
      };
 
      @Override
@@ -241,30 +234,12 @@ public class HomeFragment extends Fragment {
         Constants.showMicro = true;
         super.onStart();
         /*
-        if (ContextCompat.checkSelfPermission(getContext(),
-                LollyService.PERMISSION_STRING)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{LollyService.PERMISSION_STRING},
-                    PERMISSION_REQUEST_CODE);
-        } else {
-            Intent intent = new Intent(getContext(), LollyService.class);
-            getActivity().startService(intent);
-            getContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        }
-        */
-
-        Intent intent = new Intent(getContext(), LollyService.class);
-        //getActivity().startService(intent);
+        Intent intent = new Intent(getContext(), LollyBackService.class)
         getContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+         */
      }
 
-    /*
-     public void LogMsg(String msg)
-    {
-        binding.mShowCount.append(msg+"\n");
-    }
-     */
+
 
      private void switchToGraphFragment(){
         BottomNavigationView bottomNavigationView;
