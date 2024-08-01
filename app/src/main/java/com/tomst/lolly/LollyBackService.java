@@ -55,6 +55,19 @@ public class LollyBackService extends Service {
     public void SetHandler(Handler han){  this.handler = han; }
     public void SetDataHandler(Handler han) {this.dataHandler=han;}
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        // dle developer.android.com/guide/components/services#java
+        HandlerThread thread = new HandlerThread("ServiceStartArguments",Thread.NORM_PRIORITY);
+        thread.start();
+
+        serviceLooper = thread.getLooper();
+        serviceHandler = new ServiceHandler(serviceLooper);
+    }
+
+
     private void sendDataProgress(TDevState stat, int pos) { // Handle sending message back to handler
         Message message = handler.obtainMessage();
         TInfo info = new TInfo();
@@ -117,17 +130,6 @@ public class LollyBackService extends Service {
         }
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        // dle developer.android.com/guide/components/services#java
-        HandlerThread thread = new HandlerThread("ServiceStartArguments",Thread.NORM_PRIORITY);
-        thread.start();
-
-        serviceLooper = thread.getLooper();
-        serviceHandler = new ServiceHandler(serviceLooper);
-    }
 
     private void PrepareHardware(){
 

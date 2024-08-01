@@ -31,6 +31,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 //import com.tomst.lolly.LollyBackService;
+
+import com.tomst.lolly.LollyForeService;
 import com.tomst.lolly.R;
 import com.tomst.lolly.core.CSVReader;
 import com.tomst.lolly.core.Constants;
@@ -161,12 +163,27 @@ public class HomeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-
         Log.i("| DEBUG |", "Home Fragment, right above jni string");
-
         Log.i("| DEBUG |", getExampleStringJNI());
-
     }
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            LollyForeService.LollyBinder odometerBinder =
+                    (LollyForeService.LollyBinder) iBinder;
+            odometer = odometerBinder.getOdometer();
+            odometer.SetHandler(handler);
+            odometer.SetDataHandler(datahandler);   // do tohoto handleru posilam naparsovane data
+            odometer.SetContext(getContext());      // az tady muze startovat hardware
+            odometer.startBindService();
+            bound = true;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            bound = false;
+        }
+    };
 
 
     @Override
@@ -195,6 +212,9 @@ public class HomeFragment extends Fragment {
           //  odometer.EnableDownload(true); // resume the download
         }
     }
+
+
+
 
     /*
     private ServiceConnection connection = new ServiceConnection() {
@@ -233,6 +253,10 @@ public class HomeFragment extends Fragment {
      public void onStart(){
         Constants.showMicro = true;
         super.onStart();
+
+        Intent intent = new Intent(getContext(), LollyForeService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
         /*
         Intent intent = new Intent(getContext(), LollyBackService.class)
         getContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
