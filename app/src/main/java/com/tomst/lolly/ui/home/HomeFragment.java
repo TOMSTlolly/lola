@@ -38,7 +38,6 @@ import com.tomst.lolly.core.CSVReader;
 import com.tomst.lolly.core.Constants;
 import com.tomst.lolly.core.DmdViewModel;
 import com.tomst.lolly.core.FileOperation;
-import com.tomst.lolly.core.TDevState;
 import com.tomst.lolly.core.TInfo;
 import com.tomst.lolly.core.TMereni;
 import com.tomst.lolly.core.TMeteo;
@@ -57,6 +56,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
     private long MaxPos;
     //private Context DeviceUARTContext;
+    private LollyForeService odometer;
 
     private CSVReader csv;
     // private TMSReader ftTMS;
@@ -167,13 +167,13 @@ public class HomeFragment extends Fragment {
         Log.i("| DEBUG |", getExampleStringJNI());
     }
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             LollyForeService.LollyBinder odometerBinder =
                     (LollyForeService.LollyBinder) iBinder;
             odometer = odometerBinder.getOdometer();
-            odometer.SetHandler(handler);
+            odometer.SetInfoHandler(handler);
             odometer.SetDataHandler(datahandler);   // do tohoto handleru posilam naparsovane data
             odometer.SetContext(getContext());      // az tady muze startovat hardware
             odometer.startBindService();
@@ -255,7 +255,7 @@ public class HomeFragment extends Fragment {
         super.onStart();
 
         Intent intent = new Intent(getContext(), LollyForeService.class);
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        getContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         /*
         Intent intent = new Intent(getContext(), LollyBackService.class)

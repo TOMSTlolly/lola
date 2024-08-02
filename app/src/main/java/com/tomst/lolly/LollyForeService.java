@@ -41,6 +41,8 @@ public class LollyForeService extends Service {
     private static Handler infoHandler = null;  // to transfer state machine position from the TMSReader
 
     public void SetDataHandler(Handler han) {this.dataHandler=han;}
+    public void SetInfoHandler(Handler han) {this.infoHandler=han;}
+    public void SetContext(Context context){this.mContext = context;}
 
 
     private void sendDataProgress(TDevState stat, int pos) { // Handle sending message back to handler
