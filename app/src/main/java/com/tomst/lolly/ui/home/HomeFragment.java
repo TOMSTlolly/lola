@@ -254,8 +254,8 @@ public class HomeFragment extends Fragment {
         Constants.showMicro = true;
         super.onStart();
 
-        Intent intent = new Intent(getContext(), LollyForeService.class);
-        getContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+//        Intent intent = new Intent(getContext(), LollyForeService.class);
+//        getContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         /*
         Intent intent = new Intent(getContext(), LollyBackService.class)

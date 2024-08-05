@@ -58,14 +58,28 @@ public class LollyForeService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        createNotificationChannel();
+       createNotificationChannel();
         infoHandler = new Handler(Looper.getMainLooper());
     }
+
+        private void createNotificationChannel() {
+            NotificationChannel serviceChannel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Foreground Service Channel",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            serviceChannel.setSound(null,null); // Disable sound
+            notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(serviceChannel);
+        }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         String input = intent.getStringExtra("inputExtra");
+
+  //      createNotificationChannel();
 
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -84,7 +98,8 @@ public class LollyForeService extends Service {
         return START_STICKY;
     }
 
-    private void drawProgress() {
+
+    private void updateProgress() {
         notificationBuilder.setProgress(100, progress, false);
         notificationManager.notify(1, notificationBuilder.build());
     }
@@ -106,14 +121,32 @@ public class LollyForeService extends Service {
             }
         }, 1000);
          */
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (progress < 100) {
+                    progress++;
+                    updateProgress();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                stopForeground(true);
+                stopSelf();
+            }
+        }).start();
+        /*
         new Thread(
                 new Runnable() {
                     @Override
                     public void run() {
                         while (true) {
                             //Log.e("Service", "Service is running...");
-                            drawProgress();
+
                             progress++;
+                            drawProgress();
                             try {
                                 Thread.sleep(2000);
                             } catch (InterruptedException e) {
@@ -123,18 +156,10 @@ public class LollyForeService extends Service {
                     }
                 }
         ).start();
+
+         */
     }
 
-    private void createNotificationChannel() {
-        NotificationChannel serviceChannel = new NotificationChannel(
-                CHANNEL_ID,
-                "Foreground Service Channel",
-                NotificationManager.IMPORTANCE_LOW
-        );
-        serviceChannel.setSound(null,null); // Disable sound
-        notificationManager = getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(serviceChannel);
-    }
 
     @Nullable
     @Override

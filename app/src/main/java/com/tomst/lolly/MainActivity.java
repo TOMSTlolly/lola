@@ -72,22 +72,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    /*
-    private ServiceConnection connection = new ServiceConnection() {
-        private boolean bound;
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder binder) {
-            LollyBackService.LollyBinder lollyBinder =
-                    (LollyBackService.LollyBinder) binder;
-            lollyBack = lollyBinder.getOdometer();
-            bound = true;
-        }
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            bound = false;
-        }
-    };
-     */
 
 
     public boolean checkPermission(){
@@ -213,45 +197,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /*
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CODE:
-                if (grantResults.length > 0) {
-                    boolean locationAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean cameraAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (locationAccepted && cameraAccepted)
-                        Snackbar.make(view, "Permission Granted, Now you can access external storage.", Snackbar.LENGTH_LONG).show();
-                    else {
-
-                        Snackbar.make(view, "Permission Denied, You cannot access external storage.", Snackbar.LENGTH_LONG).show();
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            if (shouldShowRequestPermissionRationale(READ_EXTERNAL_STORAGE)) {
-                                showMessageOKCancel("You need to allow access to both the permissions",
-                                        new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which) {
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                                    requestPermissions(new String[]{READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE},
-                                                            PERMISSION_REQUEST_CODE);
-                                                }
-                                            }
-                                        });
-                                return;
-                            }
-                        }
-
-                    }
-                }
-
-
-                break;
-        }
-    }
-     */
 
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(MainActivity.this)
@@ -265,6 +210,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // for user authentication
     FirebaseAuth auth;
     FirebaseUser user;
+
+  // ------------------------------- ForeGround Service
+    private LollyForeService odometer;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        private boolean bound;
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            LollyForeService.LollyBinder odometerBinder =
+                    (LollyForeService.LollyBinder) iBinder;
+            odometer = odometerBinder.getOdometer();
+ //           odometer.SetInfoHandler(handler);
+ //           odometer.SetDataHandler(datahandler);   // do tohoto handleru posilam naparsovane data
+ //           odometer.SetContext(getContext());      // az tady muze startovat hardware
+            odometer.startBindService();
+            bound = true;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            bound = false;
+        }
+    };
 
     // uz mi bezi foregroundService ?
     public boolean foregroundServiceRunning(){
@@ -288,8 +255,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!foregroundServiceRunning()) {
                 Intent serviceIntent = new Intent(this, LollyForeService.class);
                 serviceIntent.putExtra("inputExtra", "Foreground priklad Android");
-                //startForegroundService(serviceIntent);
-                ContextCompat.startForegroundService(this,serviceIntent);
+                startForegroundService(serviceIntent);
+              ///  ContextCompat.startForegroundService(this,serviceIntent);
             }
         }
 
